@@ -39,6 +39,9 @@ using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using Kooboo.CMS.Content.Formatter;
+using System.Web.Routing;
+using System.Text.RegularExpressions;
+using System.Net;
 namespace Kooboo.CMS.Web.Areas.Contents.Controllers
 {
     [Kooboo.CMS.Web.Authorizations.Authorization(AreaName = "Contents", Group = "", Name = "Content", Order = 1)]
@@ -86,6 +89,7 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
             TextFolder textFolder = new TextFolder(Repository, folderName).AsActual();
             var schema = textFolder.GetSchema().AsActual();
 
+
             SchemaPath schemaPath = new SchemaPath(schema);
             ViewData["Folder"] = textFolder;
             ViewData["Schema"] = schema;
@@ -107,6 +111,7 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
 
             IContentQuery<TextContent> query = textFolder.CreateQuery();
             query = SortByField(sortField, sortDir, query);
+
             bool showTreeStyle = schema.IsTreeStyle;
             //如果有带搜索条件，则不输出树形结构
             if (!string.IsNullOrEmpty(search))
@@ -122,6 +127,24 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
                 }
                 showTreeStyle = false;
             }
+
+            //// Category filter
+            if (textFolder.Categories != null)
+            {
+                foreach (CategoryFolder cf in textFolder.Categories)
+                {
+
+                    string uuid = Request.QueryString[cf.FolderName];
+                    if (!String.IsNullOrEmpty(uuid))
+                    {
+                        TextFolder tf = new TextFolder(Repository, cf.FolderName).AsActual();
+                        IWhereExpression exp = new WhereCategoryExpression(null, tf.CreateQuery().Where("UUID='" + uuid + "'")); //
+                        query = query.Where(exp);
+                    }
+                }
+            }
+            //// 
+
             if (whereClause != null && whereClause.Count() > 0)
             {
                 var expression = WhereClauseToContentQueryHelper.Parse(whereClause, schema, new MVCValueProviderWrapper(ValueProvider));
@@ -208,7 +231,7 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
         // Kooboo.CMS.Account.Models.Permission.Contents_ContentPermission
         [Kooboo.CMS.Web.Authorizations.Authorization(AreaName = "Contents", Group = "", Name = "Content", Order = 1)]
         [HttpGet]
-        public virtual ActionResult Create(string folderName, string parentFolder)
+        public virtual ActionResult Create(string folderName, string parentFolder, string LikeUUID)
         {
             TextFolder textFolder = new TextFolder(Repository, folderName).AsActual();
             var schema = textFolder.GetSchema().AsActual();
@@ -222,6 +245,26 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
 
             var content = Binder.Default(schema);
             content = Binder.Bind(schema, content, Request.QueryString, true, false);
+
+            // copy categories and parentUUID - TODO
+            if (!String.IsNullOrEmpty(LikeUUID))
+            {
+                // želimo kategorije iz zadanog itema
+                var contentLike = schema.CreateQuery().WhereEquals("UUID", LikeUUID).FirstOrDefault();
+
+                // sve kategorije za ovaj folder
+                List<TextContent> addedCategories = new List<TextContent>();
+                foreach (CategoryFolder cf in textFolder.Categories)
+                {
+                    addedCategories.AddRange(contentLike.Categories(cf.FolderName));
+                }
+
+                // copy parentUUID
+                content.ParentUUID = contentLike.ParentUUID;
+
+                var cb = TextContentManager.Add(Repository, textFolder, content.ParentFolder, content.ParentUUID, content.ToNameValueCollection(), Request.Files, addedCategories, User.Identity.Name);
+                content = new TextContent(cb);
+            }
 
             return View(content);
         }
@@ -247,6 +290,8 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
 
                     content = TextContentManager.Add(Repository, textFolder, parentFolder, parentUUID, form, Request.Files, addedCategories, User.Identity.Name);
 
+                    data.ClosePopup = false;
+                    data.RedirectToOpener = false;
                     data.RedirectUrl = @return;
                 }
             }
@@ -267,7 +312,7 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
 
         #endregion
 
-        #region Edit
+
         [Kooboo.CMS.Web.Authorizations.Authorization(AreaName = "Contents", Group = "", Name = "Content", Order = 1)]
         [HttpGet]
         public virtual ActionResult Edit(string folderName, string uuid)
@@ -341,6 +386,88 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
 
         [Kooboo.CMS.Web.Authorizations.Authorization(AreaName = "Contents", Group = "", Name = "Content", Order = 1)]
         [HttpGet]
+        public ActionResult PositionCrop(string folderName, string uuid, 
+            string ImageField = "Image", string CropInfoField="CropInfo", String poisitionName="default")
+        {
+
+            TextFolder tf = new TextFolder(Repository, folderName).AsActual();
+            TextContent tc = tf.CreateQuery().WhereEquals("UUID", uuid).FirstOrDefault();
+
+            string ImageUrl = (String)tc[ImageField];
+            string crop_json = (string)tc[CropInfoField];
+
+            CropBox cb = new CropBox();
+
+            if (!String.IsNullOrEmpty(crop_json)) {
+                CropInfo ci = Newtonsoft.Json.JsonConvert.DeserializeObject<CropInfo>(crop_json.ToString());
+                cb = (CropBox)ci[CropInfoField] ?? new CropBox();
+            }
+
+            ViewData["SourceUrl"] = ImageUrl;
+            ViewData["CropParam"] = new
+            {
+                Url = ImageUrl,
+                X = cb.x,
+                Y = cb.y,
+                Width = cb.width,
+                Height = cb.height
+            };
+
+            return View();
+        }
+
+        [Kooboo.CMS.Web.Authorizations.Authorization(AreaName = "Contents", Group = "", Name = "Content", Order = 1)]
+        [HttpPost]
+        public virtual ActionResult PositionCropUpdate(string UUID, string siteName, string FolderName, string repository, 
+            string ImageField = "Image", string CropInfoField = "CropInfo", String poisitionName = "default")
+        {
+            var data = new JsonResultData();
+            return View();
+        }
+
+        [Kooboo.CMS.Web.Authorizations.Authorization(AreaName = "Contents", Group = "", Name = "Content", Order = 1)]
+        [HttpGet]
+        public ActionResult UpdateImageFile(string UUID, string siteName, string FolderName, string repository, string ImageField = "Image")
+        {
+            return View();
+        }
+
+        [Kooboo.CMS.Web.Authorizations.Authorization(AreaName = "Contents", Group = "", Name = "Content", Order = 1)]
+        [HttpPost]
+        public ActionResult UpdateImageFile(string UUID, string siteName, string FolderName, string ImageField = "Image")
+        {
+            string _siteName = siteName;
+
+            var textFolder = (TextFolder)(FolderHelper.Parse<TextFolder>(Repository, FolderName).AsActual());
+            var schema = textFolder.GetSchema();
+            var item = schema.CreateQuery().SingleOrDefault(it => it.UUID == UUID);
+
+            Kooboo.CMS.Sites.Models.Site site1 = Kooboo.CMS.Sites.Models.Site.Current;
+
+            // an encoded reference to the file that you're updating perhaps - UUID
+            string postdata = Request["postdata"];
+            // the url of the saved file
+            string url = Request["url"];
+
+            // prefix filename with aviary
+            string filePath = Server.UrlDecode((String)item[ImageField]);
+            filePath = Regex.Replace(filePath, @"/[^/]+(\..+)$", "/aviary-" + Guid.NewGuid().ToString() + "$1");
+
+            // file save destination
+            string localFileDest = Server.MapPath(filePath);
+            
+            // update local file path
+            ServiceFactory.TextContentManager.Update(Repository, schema, UUID, new string[] { ImageField }, new object[] { filePath }, User.Identity.Name);
+
+            // download
+            WebClient client = new WebClient();
+            client.DownloadFile(url, localFileDest);
+            return Content("done " + filePath);
+        }
+
+
+        [Kooboo.CMS.Web.Authorizations.Authorization(AreaName = "Contents", Group = "", Name = "Content", Order = 1)]
+        [HttpGet]
         public virtual ActionResult InlineEdit(string folderName, string uuid)
         {
             TextFolder textFolder = new TextFolder(Repository, folderName).AsActual();
@@ -358,7 +485,46 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
             }
             return View(content);
         }
-        #endregion
+
+        [Kooboo.CMS.Web.Authorizations.Authorization(AreaName = "Contents", Group = "", Name = "Content", Order = 1)]
+        [HttpGet]
+        public  JsonResult JSONForUUIDs(string folderName, string UUIDs)
+        {
+            string[] uuids = UUIDs.Split(',');
+            TextFolder textFolder = new TextFolder(Repository, folderName).AsActual();
+            var schema = textFolder.GetSchema().AsActual();
+
+            var img_column = schema.Columns.Find(i => i.ControlType == "ImageCrop");//|| i.ControlType == "File"
+            string img_column_key = img_column != null ? img_column.Name : "";
+
+            var related_items = schema.CreateQuery().WhereIn("UUID", uuids);
+            
+            // keep order
+            List<Object> items = new List<object>();
+            foreach(string uuid in uuids)
+            {
+                var item = related_items.SingleOrDefault(i => i.UUID == uuid);
+                if (item != null)
+                {
+                    object image;
+                    string thumb = "";
+                    item.TryGetValue(img_column_key, out image);
+                    if (img_column!=null && !String.IsNullOrEmpty((string)image) )
+                    {
+                        image = UrlUtility.resizeImage((string)image,60,60);
+                        thumb = image.ToString();
+                    }
+                    items.Add(new
+                    {
+                        Text = item.GetSummary(),
+                        UUID = item.UUID,
+                        thumb = thumb
+                    });
+                }
+            }
+
+            return Json(items, JsonRequestBehavior.AllowGet);
+        }
 
         #region Delete
         // Kooboo.CMS.Account.Models.Permission.Contents_ContentPermission
@@ -435,7 +601,6 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
             }
         }
 
-
         private void SetPermissionData(TextFolder folder)
         {
             var workflowManager = Kooboo.CMS.Content.Services.ServiceFactory.WorkflowManager;
@@ -472,7 +637,6 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
             var query = textFolder.CreateQuery();
 
             query = SortByField(sortField, sortDir, query);
-
 
             bool showTreeStyle = schema.IsTreeStyle;
             if (showTreeStyle)
@@ -785,6 +949,11 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
         }
 
         #endregion
+
+        public ActionResult Html5Uploader()
+        {
+            return View();
+        }
 
         #region Order
 

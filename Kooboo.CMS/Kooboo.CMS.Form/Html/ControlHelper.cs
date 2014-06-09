@@ -54,6 +54,7 @@ namespace Kooboo.CMS.Form.Html
             RegisterControl(new Tinymce());
             RegisterControl(new HighlightEditor());
             RegisterControl(new Password());
+            RegisterControl(new TextContentPicker());
             //RegisterControl(new InputNumber());
             //RegisterControl(new CLEditor());
         }

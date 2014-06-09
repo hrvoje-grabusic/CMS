@@ -574,7 +574,7 @@
       <Name>Kooboo.CMS.Form</Name>
     </ProjectReference>
     <ProjectReference Include="..\Kooboo.CMS.Membership\Kooboo.CMS.Membership.csproj">
-      <Project>{3df23643-4bd1-4564-82b9-9ec594ad05b6}</Project>
+      <Project>{3DF23643-4BD1-4564-82B9-9EC594AD05B6}</Project>
       <Name>Kooboo.CMS.Membership</Name>
     </ProjectReference>
     <ProjectReference Include="..\Kooboo.CMS.Search\Kooboo.CMS.Search.csproj">

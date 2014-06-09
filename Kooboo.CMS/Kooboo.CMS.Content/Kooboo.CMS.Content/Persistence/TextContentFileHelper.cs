@@ -9,6 +9,9 @@
 using Kooboo.CMS.Common.Persistence.Non_Relational;
 using Kooboo.CMS.Content.Models;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using Kooboo.Drawing;
+using System.IO;
 namespace Kooboo.CMS.Content.Persistence.Default
 {
     public static class TextContentFileHelper
@@ -23,12 +26,40 @@ namespace Kooboo.CMS.Content.Persistence.Default
                 Dictionary<string, string> fileFields = new Dictionary<string, string>();
                 foreach (var file in content.ContentFiles)
                 {
-                    var column = schema[file.Name];
+                    Column column = schema[file.Name];
+
+                    // BATCH UPLOAD napravi title ako nije zadan
+                    if ( string.IsNullOrEmpty((string)content["Title"]) )
+                    {
+                        // napravi title od filenama
+                        string title = file.FileName.Replace("-", " ").Replace("_", " ");
+                        title = Regex.Replace(title,@"\.[^\.]+$","");
+                        content["Title"] = title;
+                    }
+
+                    // ako nije pronađena columna probaj ju naći
+                    if(column==null)
+                    {
+                        
+                        // ako je slika probaj naći image crop 
+                        bool isImage = ImageTools.IsImageExtension(Path.GetExtension(file.FileName));
+                        if(isImage)
+                        {
+                            column = schema.Columns.Find(i => i.ControlType == "ImageCrop");
+                        }
+
+                        // ako je još uvjek null probaj naći file controlu
+                        if (column == null)
+                        {
+                            column = schema.Columns.Find(i => i.ControlType == "File");
+                        }
+                    }
+
                     if (column != null)
                     {
                         if (file.Stream.Length > 0 && !string.IsNullOrEmpty(file.FileName))
                         {
-                            var fileVirtualPath = Kooboo.Web.Url.UrlUtility.ResolveUrl(textContentFileProvider.Save(content, file));
+                            var fileVirtualPath = textContentFileProvider.Save(content, file);//hrcvoje remove Url.ResolveUrl()
                             var value = content[file.Name] == null ? "" : content[file.Name].ToString();
                             if (fileFields.ContainsKey(file.Name))
                             {
@@ -43,10 +74,11 @@ namespace Kooboo.CMS.Content.Persistence.Default
                             {
                                 value = value.ToString().Trim('|') + "|" + fileVirtualPath;
                             }
-                            fileFields[file.Name] = value;
+                            fileFields[column.Name] = value;
                         };
 
                     }
+
                 }
                 foreach (var item in fileFields)
                 {

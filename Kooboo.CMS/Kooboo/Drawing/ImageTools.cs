@@ -1154,7 +1154,7 @@ namespace Kooboo.Drawing
         /// Gets the JPG codec.
         /// </summary>
         /// <returns></returns>
-        private static ImageCodecInfo GetJpgCodec()
+        public static ImageCodecInfo GetJpgCodec()
         {
             ImageCodecInfo[] aCodecs = ImageCodecInfo.GetImageEncoders();
             ImageCodecInfo oCodec = null;

@@ -84,6 +84,8 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
                     model.UtcCreationDate = DateTime.UtcNow;
                     Manager.Add(Repository, model);
 
+                    resultData.RedirectToOpener = false;// hrvoje
+                    resultData.ClosePopup = false;
                     resultData.RedirectUrl = @return;
                 });
 

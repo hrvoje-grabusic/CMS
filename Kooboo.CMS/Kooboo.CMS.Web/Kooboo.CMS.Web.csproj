@@ -152,6 +152,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Areas\Contents\Models\CreateRepositoryModel.cs" />
+    <Compile Include="Areas\Contents\Models\CropInfo.cs" />
     <Compile Include="Areas\Contents\Models\DataSources\ControlTypesDataSource.cs" />
     <Compile Include="Areas\Contents\Models\DataSources\MediaFoldersDataSource.cs" />
     <Compile Include="Areas\Contents\Models\DataSources\OrderDirectionsDataSource.cs" />

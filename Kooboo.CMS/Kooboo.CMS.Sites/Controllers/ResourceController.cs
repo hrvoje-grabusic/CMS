@@ -25,6 +25,10 @@ using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using Kooboo.CMS.Content.Models;
+
+using System.Text.RegularExpressions;
+using System.Web.Security;
+
 namespace Kooboo.CMS.Sites.Controllers
 {
     /// <summary>
@@ -285,6 +289,113 @@ namespace Kooboo.CMS.Sites.Controllers
             string cachingPath = imageCachingPath + imagePath.Substring(cms_dataPath.Length);
             return Path.Combine(Path.GetDirectoryName(cachingPath), newFileName + Path.GetExtension(imagePath));
         }
+
+        /// <summary>
+        /// Smart resize
+        /// </summary>
+        public virtual ActionResult SmartSize(string url, int width, int height, string vAlign = "center", string hAlign = "center")
+        {
+            string imageFullPath;
+			if (Regex.IsMatch(url, @"^https?"))
+			{
+				// remote image
+				imageFullPath = url ;
+			} else {
+				// local image
+				imageFullPath  = Server.MapPath(HttpUtility.UrlDecode(url));
+			}
+			
+            var cachingPath = GetCachingFilePathSmartSize(imageFullPath, width, height,vAlign,hAlign);
+
+            if (!System.IO.File.Exists(cachingPath))
+            {
+				//return Content("test:not from cache file doesnt exist:" + cachingPath);
+                lock (resizeImageLocker)
+                {
+                    if (!System.IO.File.Exists(cachingPath))
+                    {
+                        var dir = Path.GetDirectoryName(cachingPath);
+                        IOUtility.EnsureDirectoryExists(dir);
+                        var success = MetroImage.SmartSize(imageFullPath, cachingPath, width, height,vAlign,hAlign);
+                        if (!success)
+                        {
+                            cachingPath = imageFullPath;
+                        }
+                    }
+                }
+
+            }
+            SetCache(HttpContext.Response, 2592000, "*");
+            return File(cachingPath, IOUtility.MimeType(imageFullPath));
+        }
+
+        private string GetCachingFilePathSmartSize(string imagePath, int width, int height,string vAlign,string hAlign)
+        {
+            string cms_dataPath = Path.Combine(Kooboo.Settings.BaseDirectory, "Cms_Data");
+            string fileName = Path.GetFileNameWithoutExtension(imagePath);
+			string imageCachingPath = Path.Combine(Kooboo.Settings.BaseDirectory, "Cms_Data", "ImageCaching");
+			string cachingPath = "";
+
+			if (Regex.IsMatch(imagePath, @"^https?"))
+			{
+				fileName = FormsAuthentication.HashPasswordForStoringInConfigFile(imagePath, "MD5");
+				cachingPath = imageCachingPath + "/remote-images/";
+            }
+            else
+            {
+                cachingPath = imageCachingPath + imagePath.Substring(cms_dataPath.Length);
+            }
+
+            string newFileName = "mres-" + fileName + "-" + width.ToString() + "-" + height.ToString() + "-" + vAlign + "-" + hAlign;
+            
+            return Path.Combine(Path.GetDirectoryName(cachingPath), newFileName + Path.GetExtension(imagePath));
+        }
+
+		/// <summary>
+		/// Crop and resize
+		/// </summary>
+		public ActionResult CropAndResize(string url, int x, int y, int width, int height, int destWidth=0, int destHeight=0)
+		{
+			var imageFullPath = Server.MapPath(HttpUtility.UrlDecode(url));
+
+			var cachingPath = GetCachingFilePathCropAndResize(imageFullPath, x, y, width, height, destWidth, destHeight);
+
+			if (!System.IO.File.Exists(cachingPath))
+			{
+				//return Content("test:not from cache file doesnt exist:" + cachingPath);
+				lock (resizeImageLocker)
+				{
+					if (!System.IO.File.Exists(cachingPath))
+					{
+						var dir = Path.GetDirectoryName(cachingPath);
+						IOUtility.EnsureDirectoryExists(dir);
+						var success = MetroImage.CropAndResize(imageFullPath, cachingPath, x, y, width, height, destWidth, destHeight);
+						if (!success)
+						{
+							cachingPath = imageFullPath;
+						}
+					}
+				}
+			}
+			return File(cachingPath, IOUtility.MimeType(imageFullPath));
+		}
+
+		private string GetCachingFilePathCropAndResize(string imagePath, int x, int y,int width, int height, int destWidth, int destHeight)
+		{
+			string cms_dataPath = Path.Combine(Kooboo.Settings.BaseDirectory, "Cms_Data");
+			string fileName = Path.GetFileNameWithoutExtension(imagePath);
+
+			if (Regex.IsMatch(imagePath, @"^https?"))
+			{
+				fileName = FormsAuthentication.HashPasswordForStoringInConfigFile(imagePath, "MD5");
+			}
+
+			string newFileName = "mcrop-" + fileName + "-" + x + "-" + y + "-" + width + "x" + height + "-" + destWidth + "x" + destHeight;
+			string imageCachingPath = Path.Combine(Kooboo.Settings.BaseDirectory, "Cms_Data", "ImageCaching");
+			string cachingPath = imageCachingPath + imagePath.Substring(cms_dataPath.Length);
+			return Path.Combine(Path.GetDirectoryName(cachingPath), newFileName + Path.GetExtension(imagePath));
+		}
+  
         #endregion
 
         #region Cache setting

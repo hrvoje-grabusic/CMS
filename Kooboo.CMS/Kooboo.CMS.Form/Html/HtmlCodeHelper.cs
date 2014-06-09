@@ -15,6 +15,9 @@ using System.IO;
 using Kooboo.Web.Url;
 using Kooboo.Globalization;
 using Kooboo.CMS.Common;
+using System.Security.Policy;
+using System.Web.Mvc;
+using System.Web.Routing;
 namespace Kooboo.CMS.Form.Html
 {
     public static class HtmlCodeHelper
@@ -84,12 +87,27 @@ namespace Kooboo.CMS.Form.Html
         private static IHtmlString RenderFile(string item)
         {
             var url = UrlUtility.ResolveUrl(item);
+
+            // get request context needed to build action urls
+            RequestContext rc = ((MvcHandler)HttpContext.Current.Handler).RequestContext;
+            
+            // istance UrlHelper so we can build mvc urls
+            UrlHelper uh = new UrlHelper(rc);
+
+            // we need the sitename to resize images
+            String sitename = (string)HttpContext.Current.Request["siteName"];
+
+            if (!String.IsNullOrEmpty(sitename))
+            {
+                url = uh.Action("ResizeImage", "Resource", new { siteName = sitename, url = item, area = "", width = 0, height = 60, preserverAspectRatio = true, quality = 80, t = DateTime.Now.Ticks });
+            }
+
             try
             {
                 var extension = Path.GetExtension(item).ToLower();
                 if (extension == ".gif" || extension == ".jpg" || extension == ".png" || extension == ".bmp" || extension == ".ico")
                 {
-                    return new HtmlString(string.Format("<img src='{0}' width='100' height='100'/>", url));
+                    return new HtmlString(string.Format("<img src='{0}' height='60'/>", url));
                 }
                 else
                 {
@@ -100,7 +118,6 @@ namespace Kooboo.CMS.Form.Html
             {
                 return new HtmlString(item.Trim());
             }
-
         }
     }
 }

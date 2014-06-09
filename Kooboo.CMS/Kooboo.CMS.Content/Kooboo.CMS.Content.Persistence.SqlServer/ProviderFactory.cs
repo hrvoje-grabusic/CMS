@@ -28,8 +28,6 @@ namespace Kooboo.CMS.Content.Persistence.SqlServer
             get { return ProviderName; }
         }
 
-
-
         //public void Register(IContainerManager containerManager, ITypeFinder typeFinder)
         //{
         //    containerManager.AddComponent<IProviderFactory, ProviderFactory>();

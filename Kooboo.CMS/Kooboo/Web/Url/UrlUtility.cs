@@ -13,6 +13,8 @@ using System.Text;
 using System.Web;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Web.Routing;
+using System.Web.Mvc;
 
 namespace Kooboo.Web.Url
 {
@@ -25,6 +27,26 @@ namespace Kooboo.Web.Url
         /// 
         /// </summary>
         static Regex invalidUrlCharacter = new Regex(@"[^a-z|^_|^\d|^\u4e00-\u9fa5]+", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
+
+        public static string resizeImage(string path, int width = 0, int height = 0)
+        {
+            // get request context needed to build action urls
+            RequestContext rc = ((MvcHandler)HttpContext.Current.Handler).RequestContext;
+
+            // istance UrlHelper so we can build mvc urls
+            UrlHelper uh = new UrlHelper(rc);
+
+            // we need the sitename to resize images
+            String sitename = (string)HttpContext.Current.Request["siteName"];
+
+            string url = "";
+
+            if (!String.IsNullOrEmpty(sitename))
+            {
+                url = uh.Action("ResizeImage", "Resource", new { siteName = sitename, url = path, area = "", width = width, height = height, preserverAspectRatio = true, quality = 80, t = DateTime.Now.Ticks });
+            }
+            return url;
+        }
 
         /// <summary>
         /// To the URL string.

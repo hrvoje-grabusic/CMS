@@ -285,6 +285,32 @@ namespace Kooboo.CMS.Sites.View
             return ResourceCDNUrl(this.WrapperUrl(this.Url.Action("ResizeImage", "Resource", new { siteName = Site.FullName, url = imagePath, area = "", width = width, height = height, preserverAspectRatio = preserverAspectRatio, quality = quality })).ToString());
         }
 
+
+        /// <summary>
+        /// Pametni resize slike. Manju stranu razvuci na zadane dimenzije veću stranu resizaj u omjeru i odreži višak.
+        /// </summary>
+        /// <param name="imagePath">Putanja do slike</param>
+        /// <param name="width">Željena širina</param>
+        /// <param name="height">Željena visina</param>
+        /// <param name="vAlign">Crop allignment top|center|bottom</param>
+        /// <param name="hAlign">Crop allignment left|center|right</param>
+        /// <returns>Putanja do resize skripte sa svim parametrima</returns>
+        public virtual IHtmlString SmartResizeUrl(string imagePath, int width, int height, string vAlign = "center", string hAlign = "center", long quality = 95l)
+        {
+            return ResourceCDNUrl(this.WrapperUrl(
+                this.Url.Action("SmartSize", "Resource", new { url = Url.Encode(imagePath), siteName = Site.FullName, area = "", width = width, height = height, vAlign = vAlign, hAlign }
+                )).ToString());
+                
+            //return new HtmlString(HttpContext.Current.Server.HtmlEncode(img));//HttpContext.Current.Server.HtmlEncode(img)
+            //return img;
+        }
+
+        public IHtmlString CropAndResizeUrl(string imagePath, int x, int y, int width, int height, int destWidth = 0, int destHeight = 0, long quality = 95l)
+        {
+            string img = this.WrapperUrl(this.Url.Action("CropAndResize", "Resource", new { url = Url.Encode(imagePath), area = "", x = x, y = y, width = width, height = height, destWidth = destWidth, destHeight = destHeight })).ToString();
+            return new HtmlString(HttpContext.Current.Server.HtmlEncode(img));//
+        }
+
         /// <summary>
         /// the file URL under the theme of current site.
         /// </summary>

@@ -83,6 +83,7 @@
     <Compile Include="Html\Controls\IControl.cs" />
     <Compile Include="Html\Controls\Input.cs" />
     <Compile Include="Html\Controls\TextArea.cs" />
+    <Compile Include="Html\Controls\TextContentPicker.cs" />
     <Compile Include="Html\Controls\TextBox.cs" />
     <Compile Include="Html\Controls\Tinymce.cs" />
     <Compile Include="Html\DetailForm.cs" />

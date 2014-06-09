@@ -135,6 +135,7 @@
     <Compile Include="ComponentModel\MetadataForAttribute.cs" />
     <Compile Include="CultureInfoHelper.cs" />
     <Compile Include="Diagnostics\LoopWatch.cs" />
+    <Compile Include="Drawing\MetroImage.cs" />
     <Compile Include="Drawing\WebPageCapture_DefaultProvider.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />

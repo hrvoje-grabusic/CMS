@@ -105,6 +105,7 @@
     <Compile Include="Areas\Account\Models\ChangeLanguageModel.cs" />
     <Compile Include="Areas\Account\Models\CreateRoleModel.cs" />
     <Compile Include="Areas\Account\Models\DataSources\EnabledLanguagesDataSource.cs" />
+    <Compile Include="Areas\Account\Models\DataSources\RolesDatasource.cs" />
     <Compile Include="Areas\Account\Models\EditUserModel.cs" />
     <Compile Include="Areas\Account\Models\Grid2\User_ResetPassword_GridItemColumn.cs" />
     <Compile Include="Areas\Account\Models\LoginModel.cs" />
@@ -184,6 +185,7 @@
     <Compile Include="Areas\Contents\Models\SendingSetting_Metadata.cs" />
     <Compile Include="Areas\Contents\Models\TextContentDiffModel.cs" />
     <Compile Include="Areas\Contents\Models\TextContentGrid.cs" />
+    <Compile Include="Areas\Contents\Models\TextContentImportModel.cs" />
     <Compile Include="Areas\Contents\Models\TextFolder_Metadata.cs" />
     <Compile Include="Areas\Contents\Models\VersionInfo_Metadata.cs" />
     <Compile Include="Areas\Membership\Controllers\ControllerBase.cs" />
@@ -212,19 +214,29 @@
     <Compile Include="Areas\Sites\Controllers\ABSiteSettingController.cs" />
     <Compile Include="Areas\Sites\Controllers\ABRuleSettingController.cs" />
     <Compile Include="Areas\Sites\Menu\MembershipMenuItems.cs" />
+    <Compile Include="Areas\Sites\Menu\SitesMenu.cs" />
     <Compile Include="Areas\Sites\Models\ABPageTestHitsReport.cs" />
     <Compile Include="Areas\Sites\Models\ABPageTestResult_Metadata.cs" />
     <Compile Include="Areas\Sites\Models\DataSources\MembershipDataSource.cs" />
+    <Compile Include="Areas\Sites\Models\DataSources\RouteTypesDatasource.cs" />
     <Compile Include="Areas\Sites\Models\DataSources\SiteMembershipGroupDataSource.cs" />
     <Compile Include="Areas\Sites\Models\DataSources\SubmissionPluginsDataSource.cs" />
     <Compile Include="Areas\Sites\Models\Grid2\ABPageTestHitsReport_HitTimes_GridItemColumn.cs" />
     <Compile Include="Areas\Sites\Models\Grid2\ABPageTestHitsReport_ShowTimes_GridItemColumn.cs" />
+    <Compile Include="Areas\Sites\Models\Grid2\Inheritable_Status_GridItemColumn.cs" />
+    <Compile Include="Areas\Sites\Models\Grid2\InstallationContext_GridItem.cs" />
+    <Compile Include="Areas\Sites\Models\Grid2\InstallationContext_SourceVersion_Column.cs" />
+    <Compile Include="Areas\Sites\Models\Grid2\InstallationContext_TargetVersion_Column.cs" />
+    <Compile Include="Areas\Sites\Models\Grid2\ModuleInSite_Exclude_GridItemColumn.cs" />
+    <Compile Include="Areas\Sites\Models\Grid2\Page_DisplayName_GridItemColumn.cs" />
     <Compile Include="Areas\Sites\Models\Grid2\Page_Navigation_ShowInMenu_SortableGridColumn.cs" />
     <Compile Include="Areas\Sites\Models\Grid2\Page_Navigation_ShowInMenu_GridItemColumn.cs" />
     <Compile Include="Areas\Sites\Models\Grid2\HitReport_GridItemColumn.cs" />
+    <Compile Include="Areas\Sites\Models\Grid2\Page_Publish_GridItemColumn.cs" />
     <Compile Include="Areas\Sites\Models\HtmlMeta_Metadata.cs" />
     <Compile Include="Areas\Sites\Models\ImportRepositoryModel.cs" />
     <Compile Include="Areas\Sites\Models\ImportSiteModel.cs" />
+    <Compile Include="Areas\Sites\Models\InstallationContext_Metadata.cs" />
     <Compile Include="Areas\Sites\Models\LanguageVisitRule_Metadata.cs" />
     <Compile Include="Areas\Sites\Models\PagePermission_Metadata.cs" />
     <Compile Include="Areas\Sites\Models\ProxyPosition_Metadata.cs" />
@@ -245,10 +257,11 @@
     <Compile Include="Areas\Sites\Models\ABRuleSetting_Metadata.cs" />
     <Compile Include="Areas\Sites\Models\SiteTemplate_ViewModel.cs" />
     <Compile Include="Areas\Sites\Models\QueryStringVisitRule_Metadata.cs" />
+    <Compile Include="Areas\Sites\Models\ViewDataVisitRule_Metadata.cs" />
     <Compile Include="KoobooCMSHttpApplicationEvents.cs" />
     <Compile Include="Models\AllPropertiesResolver.cs" />
     <Compile Include="Models\ImportModel.cs" />
-    <Compile Include="Models\RelationModel.cs" />
+    <Compile Include="Models\RelationModel_Metadata.cs" />
     <Compile Include="ReferrerCheckingModule.cs" />
     <Compile Include="SortByExtension.cs" />
     <Content Include="Areas\Account\Menu.config">
@@ -407,9 +420,7 @@
     <Compile Include="Areas\Sites\Models\User_Metadata.cs" />
     <Compile Include="Areas\Sites\Models\VersionInfo_Metadata.cs" />
     <Compile Include="Areas\Sites\Models\View_Metadata.cs" />
-    <Compile Include="Areas\Sites\SiteCustomTabs.cs" />
     <Compile Include="Areas\Sites\SitesAreaRegistration.cs" />
-    <Compile Include="Areas\Sites\PageCustomTabs.cs" />
     <Compile Include="Areas\SubmissionControllerBase.cs" />
     <Compile Include="Authorizations\AuthorizationAttribute.cs" />
     <Compile Include="Authorizations\AuthorizationHelpers.cs" />
@@ -1999,7 +2010,7 @@
       <Name>Kooboo.CMS.Form</Name>
     </ProjectReference>
     <ProjectReference Include="..\Kooboo.CMS.Membership\Kooboo.CMS.Membership.csproj">
-      <Project>{3df23643-4bd1-4564-82b9-9ec594ad05b6}</Project>
+      <Project>{3DF23643-4BD1-4564-82B9-9EC594AD05B6}</Project>
       <Name>Kooboo.CMS.Membership</Name>
     </ProjectReference>
     <ProjectReference Include="..\Kooboo.CMS.Search\Kooboo.CMS.Search.csproj">
