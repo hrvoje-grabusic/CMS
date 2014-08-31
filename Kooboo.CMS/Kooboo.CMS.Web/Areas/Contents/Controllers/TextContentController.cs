@@ -487,10 +487,10 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
         }
 
         [Kooboo.CMS.Web.Authorizations.Authorization(AreaName = "Contents", Group = "", Name = "Content", Order = 1)]
-        [HttpGet]
-        public  JsonResult JSONForUUIDs(string folderName, string UUIDs)
+        [HttpPost]
+        public  JsonResult JSONForUUIDs(string folderName, FormCollection form)
         {
-            string[] uuids = UUIDs.Split(',');
+            string[] uuids = form["uuids"].Split(',');
             TextFolder textFolder = new TextFolder(Repository, folderName).AsActual();
             var schema = textFolder.GetSchema().AsActual();
 
@@ -937,7 +937,9 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
                     var fileUrl = Kooboo.Web.Url.UrlUtility.Combine(tempPath, UniqueIdGenerator.GetInstance().GetBase32UniqueId(24) + Path.GetExtension(postFile.FileName));
 
                     postFile.SaveAs(Server.MapPath(fileUrl));
-                    resultData.Model = new { ImageUrl = Url.Content(fileUrl), PreviewUrl = this.Url.Action("ResizeImage", "Resource", new { siteName = Site.FullName, url = fileUrl, area = "", width = 600, height = 400, preserverAspectRatio = true, quality = 80 }) };
+                    resultData.Model = new { 
+                        ImageUrl = Url.Content(fileUrl), 
+                        PreviewUrl = this.Url.Action("ResizeImage", "Resource", new { siteName = Site.FullName, url = fileUrl, area = "", width = 600, height = 400, preserverAspectRatio = true, quality = 80 }) };
                 }
                 else
                 {

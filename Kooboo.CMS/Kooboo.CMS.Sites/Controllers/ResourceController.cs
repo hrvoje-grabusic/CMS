@@ -28,6 +28,7 @@ using Kooboo.CMS.Content.Models;
 
 using System.Text.RegularExpressions;
 using System.Web.Security;
+using Kooboo.CMS.Sites.View;
 
 namespace Kooboo.CMS.Sites.Controllers
 {
@@ -218,7 +219,7 @@ namespace Kooboo.CMS.Sites.Controllers
         /// <param name="preserverAspectRatio">The preserver aspect ratio.保持比例</param>
         /// <param name="quality">The quality.</param>
         /// <returns></returns>
-        public virtual ActionResult ResizeImage(string url, int width, int height, bool? preserverAspectRatio, int? quality)
+        public virtual ActionResult ResizeImage(string url, int width, int height, bool? preserverAspectRatio, int? quality, string key="")
         {
             if (string.IsNullOrEmpty(url))
             {
@@ -265,6 +266,15 @@ namespace Kooboo.CMS.Sites.Controllers
                 {
                     if (!System.IO.File.Exists(cachingPath))
                     {
+                        // check param signiture
+                        string str_key = url + width.ToString() + height.ToString() + preserverAspectRatio.ToString() + quality.ToString();
+                        bool authorized = User.Identity.IsAuthenticated || SecurityHelper.Encrypt(str_key) == key;
+                        if (!authorized)
+                        {
+                            Response.Write("Parameter signiture does not match parameter values, access denied.");
+                            return new EmptyResult();
+                        }
+
                         var dir = Path.GetDirectoryName(cachingPath);
                         IOUtility.EnsureDirectoryExists(dir);
                         var success = ImageTools.ResizeImage(imageFullPath, cachingPath, width, height, preserverAspectRatio.Value, quality.Value);
@@ -293,22 +303,31 @@ namespace Kooboo.CMS.Sites.Controllers
         /// <summary>
         /// Smart resize
         /// </summary>
-        public virtual ActionResult SmartSize(string url, int width, int height, string vAlign = "center", string hAlign = "center")
+        public virtual ActionResult SmartSize(string url, int width, int height, string vAlign = "center", string hAlign = "center", long quality = 95l, string key="")
         {
             string imageFullPath;
 			if (Regex.IsMatch(url, @"^https?"))
 			{
 				// remote image
-				imageFullPath = url ;
+				imageFullPath = url;
 			} else {
 				// local image
 				imageFullPath  = Server.MapPath(HttpUtility.UrlDecode(url));
 			}
 			
-            var cachingPath = GetCachingFilePathSmartSize(imageFullPath, width, height,vAlign,hAlign);
+            var cachingPath = GetCachingFilePathSmartSize(imageFullPath, width, height,vAlign, hAlign);
 
             if (!System.IO.File.Exists(cachingPath))
             {
+                // check parameter signiture
+                string str_key = url + width.ToString() + height.ToString() + vAlign.ToString() + hAlign + quality.ToString();
+                bool authorized =  User.Identity.IsAuthenticated || SecurityHelper.Encrypt(str_key) == key;
+                if(!authorized)
+                {
+                    Response.Write("Parameter signiture does not match parameter values, access denied.");
+                    return new EmptyResult();
+                }
+
 				//return Content("test:not from cache file doesnt exist:" + cachingPath);
                 lock (resizeImageLocker)
                 {
@@ -323,7 +342,6 @@ namespace Kooboo.CMS.Sites.Controllers
                         }
                     }
                 }
-
             }
             SetCache(HttpContext.Response, 2592000, "*");
             return File(cachingPath, IOUtility.MimeType(imageFullPath));

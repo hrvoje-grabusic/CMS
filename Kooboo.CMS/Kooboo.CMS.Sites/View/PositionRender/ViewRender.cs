@@ -62,10 +62,10 @@ namespace Kooboo.CMS.Sites.View.PositionRender
                 var html = RenderViewInternal(htmlHelper, view.TemplateFileVirutalPath, viewData, null);
 
 
-                if (pageContext.EnableTrace)
+                /*if (pageContext.EnableTrace)
                 {
                     html = new HtmlString(string.Format(GeneratedByViewComment, viewName, html.ToString()));
-                }
+                }*/
 
                 //restore the parent view context
                 pageContext.ViewDataContext = parentPositionContext;

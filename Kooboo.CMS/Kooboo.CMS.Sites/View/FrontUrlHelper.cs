@@ -21,6 +21,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
+using System.Web.Security;
 namespace Kooboo.CMS.Sites.View
 {
     #region InvalidPageRouteException
@@ -282,7 +283,10 @@ namespace Kooboo.CMS.Sites.View
         /// <returns></returns>
         public virtual IHtmlString ResizeImageUrl(string imagePath, int width, int height, bool? preserverAspectRatio, int? quality)
         {
-            return ResourceCDNUrl(this.WrapperUrl(this.Url.Action("ResizeImage", "Resource", new { siteName = Site.FullName, url = imagePath, area = "", width = width, height = height, preserverAspectRatio = preserverAspectRatio, quality = quality })).ToString());
+            string str_key = imagePath + width.ToString() + height.ToString() + preserverAspectRatio.ToString() + quality.ToString();
+            string key = SecurityHelper.Encrypt(str_key);
+
+            return ResourceCDNUrl(this.WrapperUrl(this.Url.Action("ResizeImage", "Resource", new { siteName = Site.FullName, url = imagePath, area = "", width = width, height = height, preserverAspectRatio = preserverAspectRatio, quality = quality , key=key})).ToString());
         }
 
 
@@ -297,8 +301,11 @@ namespace Kooboo.CMS.Sites.View
         /// <returns>Putanja do resize skripte sa svim parametrima</returns>
         public virtual IHtmlString SmartResizeUrl(string imagePath, int width, int height, string vAlign = "center", string hAlign = "center", long quality = 95l)
         {
+            string str_key = imagePath + width.ToString() + height.ToString() + vAlign.ToString() + hAlign + quality.ToString();
+            string key = SecurityHelper.Encrypt(str_key);
+
             return ResourceCDNUrl(this.WrapperUrl(
-                this.Url.Action("SmartSize", "Resource", new { url = Url.Encode(imagePath), siteName = Site.FullName, area = "", width = width, height = height, vAlign = vAlign, hAlign }
+                this.Url.Action("SmartSize", "Resource", new { url = imagePath, siteName = Site.FullName, area = "", width = width, height = height, vAlign = vAlign, hAlign=hAlign, quality= quality , key=key }
                 )).ToString());
                 
             //return new HtmlString(HttpContext.Current.Server.HtmlEncode(img));//HttpContext.Current.Server.HtmlEncode(img)
@@ -307,7 +314,10 @@ namespace Kooboo.CMS.Sites.View
 
         public IHtmlString CropAndResizeUrl(string imagePath, int x, int y, int width, int height, int destWidth = 0, int destHeight = 0, long quality = 95l)
         {
-            string img = this.WrapperUrl(this.Url.Action("CropAndResize", "Resource", new { url = Url.Encode(imagePath), area = "", x = x, y = y, width = width, height = height, destWidth = destWidth, destHeight = destHeight })).ToString();
+            string str_key = imagePath + x.ToString() + y.ToString() + width.ToString() + height.ToString() + destWidth.ToString() + destHeight.ToString() + quality.ToString();
+            string key = SecurityHelper.Encrypt(str_key);
+
+            string img = this.WrapperUrl(this.Url.Action("CropAndResize", "Resource", new { url = Url.Encode(imagePath), area = "", x = x, y = y, width = width, height = height, destWidth = destWidth, destHeight = destHeight , key=key})).ToString();
             return new HtmlString(HttpContext.Current.Server.HtmlEncode(img));//
         }
 

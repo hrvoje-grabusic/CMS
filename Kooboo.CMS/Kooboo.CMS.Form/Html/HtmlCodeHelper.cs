@@ -97,14 +97,16 @@ namespace Kooboo.CMS.Form.Html
             // we need the sitename to resize images
             String sitename = (string)HttpContext.Current.Request["siteName"];
 
-            if (!String.IsNullOrEmpty(sitename))
+            var extension = Path.GetExtension(item).ToLower();
+
+            if (!String.IsNullOrEmpty(sitename) && (extension==".jpg" || extension==".jpeg"))
             {
-                url = uh.Action("ResizeImage", "Resource", new { siteName = sitename, url = item, area = "", width = 0, height = 60, preserverAspectRatio = true, quality = 80, t = DateTime.Now.Ticks });
+                url = uh.Action("ResizeImage", "Resource", new { siteName = sitename, url = item, area = "", width = 0, height = 60, preserverAspectRatio = true, quality = 80, t = DateTime.Now.Ticks});
             }
 
             try
             {
-                var extension = Path.GetExtension(item).ToLower();
+
                 if (extension == ".gif" || extension == ".jpg" || extension == ".png" || extension == ".bmp" || extension == ".ico")
                 {
                     return new HtmlString(string.Format("<img src='{0}' height='60'/>", url));

@@ -103,29 +103,53 @@ namespace Kooboo.Drawing
             Image target = resize(img, width, height,vAlign,hAlign);
             img.Dispose();
 
-			ImageCodecInfo jgpEncoder = ImageTools.GetJpgCodec();
-			System.Drawing.Imaging.Encoder myEncoder = System.Drawing.Imaging.Encoder.Quality;
-			EncoderParameters myEncoderParameters = new EncoderParameters(1);
-			EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, 95L);
-			myEncoderParameters.Param[0] = myEncoderParameter;
+            String extension = System.IO.Path.GetExtension(sourceFilePath).ToLower();
 
-			target.Save(targetFilePath, jgpEncoder, myEncoderParameters);
+            if (extension !=".png")
+            {
+
+                ImageCodecInfo jgpEncoder = ImageTools.GetJpgCodec();
+                System.Drawing.Imaging.Encoder myEncoder = System.Drawing.Imaging.Encoder.Quality;
+                EncoderParameters myEncoderParameters = new EncoderParameters(1);
+                EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, 98L);
+                myEncoderParameters.Param[0] = myEncoderParameter;
+
+                target.Save(targetFilePath, jgpEncoder, myEncoderParameters);
+
+            }
+            else
+            {
+                target.Save(targetFilePath, System.Drawing.Imaging.ImageFormat.Png);
+            }
             return true;
         }
 
 		public static bool CropAndResize(string sourceFilePath, string targetFilePath, int x, int y, int width, int height, int destWidth=0, int destHeight=0 )
 		{
 			Image img = getImage(sourceFilePath, targetFilePath);
+            
 			Image target = ImageCropAndResize(img, x, y, width, height, destWidth, destHeight);
 			img.Dispose();
-			
-			ImageCodecInfo jgpEncoder = ImageTools.GetJpgCodec();
-			System.Drawing.Imaging.Encoder myEncoder = System.Drawing.Imaging.Encoder.Quality;
-			EncoderParameters myEncoderParameters = new EncoderParameters(1);
-			EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, 95L);
-			myEncoderParameters.Param[0] = myEncoderParameter;
 
-			target.Save(targetFilePath, jgpEncoder, myEncoderParameters);
+            String extension = System.IO.Path.GetExtension(sourceFilePath).ToLower();
+
+            if (extension != ".png")
+            {
+
+                ImageCodecInfo jgpEncoder = ImageTools.GetJpgCodec();
+                System.Drawing.Imaging.Encoder myEncoder = System.Drawing.Imaging.Encoder.Quality;
+                EncoderParameters myEncoderParameters = new EncoderParameters(1);
+                EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, 98L);
+                myEncoderParameters.Param[0] = myEncoderParameter;
+
+                target.Save(targetFilePath, jgpEncoder, myEncoderParameters);
+
+            }
+            else
+            {
+                target.Save(targetFilePath, System.Drawing.Imaging.ImageFormat.Png);
+            }
+
 			return true;
 		}
 
@@ -199,17 +223,16 @@ namespace Kooboo.Drawing
 			int bmpWidth = Width > 0 ? Width : destWidth;
 			int bmpHeight = Height > 0 ? Height : destHeight;
 
-			Bitmap bmPhoto = bmPhoto = new Bitmap(bmpWidth, bmpHeight, PixelFormat.Format24bppRgb); ;
-
+            Bitmap bmPhoto = new Bitmap(bmpWidth, bmpHeight, PixelFormat.Format32bppArgb); ;
             bmPhoto.SetResolution(imgPhoto.HorizontalResolution, imgPhoto.VerticalResolution);
 
             Graphics grPhoto = Graphics.FromImage(bmPhoto);
-            grPhoto.Clear(Color.Black);
+            //grPhoto.Clear(Color.Transparent);
 			grPhoto.CompositingMode = CompositingMode.SourceCopy;
             grPhoto.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
             grPhoto.DrawImage(imgPhoto,
-                    new Rectangle(destX-1, destY-1, destWidth+2, destHeight+2),
+                    new Rectangle(destX-1, destY-1, destWidth+1, destHeight+1),
                     new Rectangle(sourceX, sourceY, sourceWidth, sourceHeight),
                     GraphicsUnit.Pixel);
 
@@ -252,12 +275,12 @@ namespace Kooboo.Drawing
 				}
 			}
 
-			Bitmap bmPhoto = bmPhoto = new Bitmap(destWidth, destHeight, PixelFormat.Format24bppRgb); ;
+            Bitmap bmPhoto = bmPhoto = new Bitmap(destWidth, destHeight, PixelFormat.Format32bppArgb); ;
 
 			bmPhoto.SetResolution(imgPhoto.HorizontalResolution, imgPhoto.VerticalResolution);
 
 			Graphics grPhoto = Graphics.FromImage(bmPhoto);
-			grPhoto.Clear(Color.Black);
+			//grPhoto.Clear(Color.Transparent);
 			grPhoto.CompositingMode = CompositingMode.SourceCopy;
 			grPhoto.InterpolationMode = InterpolationMode.HighQualityBicubic;
 

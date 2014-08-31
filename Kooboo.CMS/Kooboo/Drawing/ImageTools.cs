@@ -1137,13 +1137,27 @@ namespace Kooboo.Drawing
 
                 using (Graphics g = Graphics.FromImage(target))
                 {
-                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
+                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
                     g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
                     g.DrawImage(src, new Rectangle(0, 0, target.Width, target.Height), r, GraphicsUnit.Pixel);
                 }
 
-                target.Save(targetStream, imageFormat);
+            
+                ImageCodecInfo oCodec = GetJpgCodec();
+
+                if (imageFormat == ImageFormat.Jpeg && oCodec != null)
+                {
+                    EncoderParameters aCodecParams = new EncoderParameters(1);
+                    aCodecParams.Param[0] = new EncoderParameter(Encoder.Quality, 98L);
+
+                    target.Save(targetStream, oCodec, aCodecParams);
+                }
+                else
+                {
+                    target.Save(targetStream, imageFormat);
+                }
+
 
             }
 
