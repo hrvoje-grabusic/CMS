@@ -164,7 +164,7 @@ namespace Kooboo.CMS.Content.Persistence.Default
                 using (ZipFile zipFile = new ZipFile(Encoding.UTF8))
                 {
                     //zipFile.ZipError += new EventHandler<ZipErrorEventArgs>(zipFile_ZipError);
-
+                    zipFile.ParallelDeflateThreshold = -1; // use less memory
                     zipFile.ZipErrorAction = ZipErrorAction.Skip;
 
 

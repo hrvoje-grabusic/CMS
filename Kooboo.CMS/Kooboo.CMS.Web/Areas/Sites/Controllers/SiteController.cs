@@ -231,35 +231,42 @@ namespace Kooboo.CMS.Web.Areas.Sites.Controllers
         {
             return View(new ExportSiteModel() { SiteName = siteName });
         }
+
         [HttpPost]
         [Kooboo.CMS.Web.Authorizations.Authorization(AreaName = "Sites", Name = "Settings", Group = "System", Order = 0)]
-        public virtual ActionResult Export(ExportSiteModel model, string @return)
+        public virtual FilePathResult Export(ExportSiteModel model, string @return)
         {
             string fileName = model.SiteName + ".zip";
 
-            switch (model.ExportType)
-            {
-                case ExportType.SiteWithDatabase:
-                    Response.AttachmentHeader(fileName);
-                    ServiceFactory.SiteManager.Export(model.SiteName, Response.OutputStream, true, model.IncludeSubSites);
-                    break;
-                case ExportType.OnlySite:
-                    Response.AttachmentHeader(fileName);
-                    ServiceFactory.SiteManager.Export(model.SiteName, Response.OutputStream, false, model.IncludeSubSites);
-                    break;
-                case ExportType.OnlitDatabase:
-                    var site = new Site(model.SiteName).AsActual();
-                    if (site != null && !string.IsNullOrEmpty(site.Repository))
-                    {
-                        fileName = site.Repository + ".zip";
+            // export to file instead of memory to avoid out of memory exception on large sites
+            string path = Url.Content("~/Cms_data/SiteTemplates/"+fileName);
+
+            using (Stream filestream = new FileStream(Server.MapPath(path), FileMode.Create, FileAccess.ReadWrite))
+            { 
+                switch (model.ExportType)
+                {
+                    case ExportType.SiteWithDatabase:
                         Response.AttachmentHeader(fileName);
-                        Kooboo.CMS.Content.Services.ServiceFactory.RepositoryManager.Export(site.Repository, Response.OutputStream);
-                    }
-                    break;
-                default:
-                    break;
+                        ServiceFactory.SiteManager.Export(model.SiteName, filestream, true, model.IncludeSubSites);
+                        break;
+                    case ExportType.OnlySite:
+                        Response.AttachmentHeader(fileName);
+                        ServiceFactory.SiteManager.Export(model.SiteName, filestream, false, model.IncludeSubSites);
+                        break;
+                    case ExportType.OnlitDatabase:
+                        var site = new Site(model.SiteName).AsActual();
+                        if (site != null && !string.IsNullOrEmpty(site.Repository))
+                        {
+                            fileName = site.Repository + ".zip";
+                            Response.AttachmentHeader(fileName);
+                            Kooboo.CMS.Content.Services.ServiceFactory.RepositoryManager.Export(site.Repository, filestream);
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
-            return null;
+            return new FilePathResult(path, System.Net.Mime.MediaTypeNames.Application.Octet);
         }
         //[Kooboo.CMS.Web.Authorizations.Authorization(AreaName = "Sites", Name = "Settings", Group = "System", Order = 0)]
         //public virtual ActionResult ExportSite(string siteName)
