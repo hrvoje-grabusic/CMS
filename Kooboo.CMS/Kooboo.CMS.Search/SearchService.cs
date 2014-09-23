@@ -28,6 +28,9 @@ using Kooboo.CMS.Common.Runtime;
 
 namespace Kooboo.CMS.Search
 {
+    /// <summary>
+    /// New class instead of TextContent converter in kooboo 3
+    /// </summary>
     public class DocumentConverter
     {
         public DocumentConverter(Analyzer analyzer)
@@ -52,6 +55,10 @@ namespace Kooboo.CMS.Search
                 || fieldName.EqualsOrNullEmpty(BodyFieldName, StringComparison.OrdinalIgnoreCase)
                 || fieldName.EqualsOrNullEmpty(NativeTypeNameField, StringComparison.OrdinalIgnoreCase);
         }
+
+         /// <summary>
+         /// Create lucene document
+        /// </summary>
         public virtual Document ToDocument(object o)
         {
             Document doc = null;
@@ -65,6 +72,7 @@ namespace Kooboo.CMS.Search
                 doc.Add(new Field(TitleFieldName, indexObject.Title, Field.Store.YES, Field.Index.ANALYZED));
                 doc.Add(new Field(BodyFieldName, indexObject.Body, Field.Store.YES, Field.Index.ANALYZED));
                 doc.Add(new Field(NativeTypeNameField, indexObject.NativeType, Field.Store.YES, Field.Index.NO));
+                
                 if (indexObject.StoreFields != null)
                 {
                     foreach (var item in indexObject.StoreFields.AllKeys)
@@ -74,7 +82,6 @@ namespace Kooboo.CMS.Search
                             doc.Add(new Field(item, indexObject.StoreFields[item], Field.Store.YES, Field.Index.NO));
                         }
                     }
-
                 }
                 if (indexObject.SystemFields != null)
                 {
@@ -89,6 +96,10 @@ namespace Kooboo.CMS.Search
             }
             return doc;
         }
+
+        /// <summary>
+        /// Convert lucene document to search result object
+        /// </summary>
         public virtual ResultObject ToResultObject(Highlighter highlighter, Document doc)
         {
             var nativeTypeName = doc.GetField(NativeTypeNameField).StringValue();
@@ -96,6 +107,10 @@ namespace Kooboo.CMS.Search
             var converter = ObjectConverters.GetConverter(nativeType);
 
             ResultObject result = new ResultObject();
+
+            // neded ro recrete custom highlightedbody
+            result.Highlighter = highlighter;
+            result.analyzer = Analyzer;
 
             result.Title = doc.GetField(TitleFieldName).StringValue();
             result.HighlightedTitle = highlighter.GetBestFragment(this.Analyzer, TitleFieldName, result.Title);
@@ -129,6 +144,7 @@ namespace Kooboo.CMS.Search
             return result;
 
         }
+
         public virtual Term GetKeyTerm(object o)
         {
             var converter = ObjectConverters.GetConverter(o.GetType());
@@ -295,6 +311,9 @@ namespace Kooboo.CMS.Search
             thread.Start();
         }
 
+        /// <summary>
+        /// Search lucene index 
+        /// </summary>
         public virtual PagedList<Models.ResultObject> Search(string key, int pageIndex, int pageSize, params string[] folders)
         {
             var indexDirectory = FSDirectory.Open(new DirectoryInfo(indexDir));
@@ -305,8 +324,10 @@ namespace Kooboo.CMS.Search
 
             var query = new BooleanQuery();
 
+            // escape lucene command from search term
             key = QueryParser.Escape(key.Trim().ToLower());
 
+            // if no key provided match everything
             if (string.IsNullOrEmpty(key))
             {
                 key = "*:*";
@@ -317,11 +338,13 @@ namespace Kooboo.CMS.Search
             titleQuery.SetBoost(2);
             query.Add(titleQuery, BooleanClause.Occur.SHOULD);
 
+            // body
             QueryParser bodyParser = new QueryParser(Lucene.Net.Util.Version.LUCENE_29, Converter.BodyFieldName, this.Analyzer);
             var bodyQuery = bodyParser.Parse(key);
             bodyQuery.SetBoost(1);
             query.Add(bodyQuery, BooleanClause.Occur.SHOULD);
 
+            // limit results to provided folders
             QueryWrapperFilter filter = null;
             if (folders != null && folders.Length > 0)
             {
@@ -350,7 +373,7 @@ namespace Kooboo.CMS.Search
 
 
             Lucene.Net.Highlight.Highlighter lighter =
-                       new Highlighter(new SimpleHTMLFormatter("<strong class='highlight'>", "</strong>"), new Lucene.Net.Highlight.QueryScorer((Query)query));
+                       new Highlighter(new SimpleHTMLFormatter("<span class='highlight'>", "</span>"), new Lucene.Net.Highlight.QueryScorer((Query)query));
 
 
             var startIndex = (pageIndex - 1) * pageSize;

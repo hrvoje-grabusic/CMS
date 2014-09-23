@@ -8,6 +8,7 @@
 #endregion
 using Kooboo.CMS.Common.Persistence.Non_Relational;
 using Kooboo.CMS.Content;
+using Kooboo.CMS.Content.Query;
 using Kooboo.CMS.Content.Models;
 using Kooboo.CMS.Content.Models.Binder;
 using Kooboo.CMS.Search;
@@ -46,6 +47,8 @@ namespace Kooboo.CMS.Sites.Search
             var repository = textContent.GetRepository();
             var schema = textContent.GetSchema().AsActual();
             var folder = textContent.FolderName;
+
+            TextFolder tf = textContent.GetFolder().AsActual();
 
             var folderSearchSetting = SearchSettingProvider.Get(new SearchSetting(repository, folder));
             if (folderSearchSetting != null)
@@ -91,6 +94,19 @@ namespace Kooboo.CMS.Sites.Search
                     }
 
                 }
+
+                // index folder categories under system field categoryUUIDs so we can query by category relations
+                /*StringBuilder categories = new StringBuilder();
+                foreach (CategoryFolder cf in tf.Categories)
+                {
+                    var cats = textContent.Categories(cf.FolderName).ToList();
+                    foreach (TextContent cat in cats)
+                    {
+                        categories.Append(cat.UUID + ",");
+                    }
+                }
+
+                sysFields["categories"] = categories.ToString();*/
 
                 indexObject = new IndexObject()
                 {
