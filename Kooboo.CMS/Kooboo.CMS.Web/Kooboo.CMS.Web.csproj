@@ -195,6 +195,7 @@
     <Compile Include="Areas\Contents\Models\VersionInfo_Metadata.cs" />
     <Compile Include="Areas\Membership\Controllers\ControllerBase.cs" />
     <Compile Include="Areas\Membership\Controllers\ExternalLoginController.cs" />
+    <Compile Include="Areas\Membership\Controllers\FrontValidationController.cs" />
     <Compile Include="Areas\Membership\Controllers\MembershipConnectController.cs" />
     <Compile Include="Areas\Membership\Controllers\MembershipController.cs" />
     <Compile Include="Areas\Membership\Controllers\MembershipGroupController.cs" />
