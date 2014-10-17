@@ -49,6 +49,21 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
 
             return View(folders);
         }
+
+        [Kooboo.CMS.Web.Authorizations.Authorization(AreaName = "Contents", Group = "", Name = "Content", Order = 1)]
+        public virtual ActionResult IndexJSON(string FolderName, string search)
+        {
+            var folders = Manager.All(Repository, search, FolderName);
+
+            var folders_json = folders
+                .Select(it => it.AsActual())
+                .Where(it => it.Visible)
+                .Where(it => Kooboo.CMS.Content.Services.ServiceFactory.WorkflowManager.AvailableViewContent(new TextFolder(Repository, it.FullName), User.Identity.Name))
+                .Select(it => new { value=it.FullName, name=it.DisplayName })
+                .ToArray();
+
+            return Json(folders_json);
+        }
         #endregion
 
 
