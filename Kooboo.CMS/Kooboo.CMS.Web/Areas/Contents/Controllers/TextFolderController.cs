@@ -51,18 +51,22 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
         }
 
         [Kooboo.CMS.Web.Authorizations.Authorization(AreaName = "Contents", Group = "", Name = "Content", Order = 1)]
-        public virtual ActionResult IndexJSON(string FolderName, string search)
+        public virtual ActionResult IndexJSON(string term)
         {
-            var folders = Manager.All(Repository, search, FolderName);
+            // use slash syntax instead of ~ and split into multiple terms by whitespace
+            string[] terms = term.ToLower().Replace("/","~").Split(' ');
+
+            var folders = Manager.AllFoldersFlattened(Repository);
 
             var folders_json = folders
                 .Select(it => it.AsActual())
                 .Where(it => it.Visible)
                 .Where(it => Kooboo.CMS.Content.Services.ServiceFactory.WorkflowManager.AvailableViewContent(new TextFolder(Repository, it.FullName), User.Identity.Name))
-                .Select(it => new { value=it.FullName, name=it.DisplayName })
+                .Where(it => String.IsNullOrEmpty(term) || terms.All( t=> it.FullName.ToLower().Contains(t) ) )
+                .Select(it => new { value = it.FullName.ToLower().Replace("~", "/") })
                 .ToArray();
 
-            return Json(folders_json);
+            return Json(folders_json, JsonRequestBehavior.AllowGet);
         }
         #endregion
 
