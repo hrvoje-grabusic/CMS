@@ -89,8 +89,13 @@ namespace Kooboo.CMS.Web.Areas.Contents.Menu
                 {
                     base.Controller = "TextContent";
                     base.Action = "index";
+
+                    // add data atribute to enable drag and drop move 
+                    HtmlAttributes["data-folder"] = folder.FullName;
+                    HtmlAttributes["data-schema"] = ((TextFolder)folder).SchemaName;// might be usefull for hover effects
                 }
                 cssClass = "TextFolder";
+                
             }
             else if (folder is MediaFolder)
             {

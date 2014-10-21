@@ -76,7 +76,7 @@ namespace Kooboo.CMS.Form.Html
                 <tr class=""folderTr"">
                     <td></td>
                     <td>
-                        <a class=""f-icon folder"" href=""@this.Url.Action(""SelectCategories"", ViewContext.RequestContext.AllRouteValues().Merge(""FolderName"", (object)(folder.Parent.FullName)).Merge(""FullName"", (object)(folder.Parent.FullName)))"">...</a>
+                        <a class=""f-icon folder"" href=""@this.Url.Action(""SelectCategories"", ViewContext.RequestContext.AllRouteValues().Merge(""FolderName"", (object)(folder.Parent.FullName)).Merge(""FullName"", (object)(folder.Parent.FullName)))"">..</a>
                     </td>
                     <td colspan=""{2}""></td>
                 </tr>

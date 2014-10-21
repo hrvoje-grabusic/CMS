@@ -1036,6 +1036,32 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
             });
             return Json(data);
         }
+
+        [Kooboo.CMS.Web.Authorizations.Authorization(AreaName = "Contents", Group = "", Name = "Content", Order = 1)]
+        [HttpPost]
+        public virtual ActionResult MoveContentToFolder(string folderName, string targetFolder, string[] UUIDs)
+        {
+            var data = new JsonResultData(ModelState);
+            data.RunWithTry((resultData) =>
+            {
+                var source_tf = new TextFolder(Repository.Current, folderName).AsActual();
+                var target_tf = new TextFolder(Repository.Current, targetFolder).AsActual();
+
+                if(source_tf.SchemaName==target_tf.SchemaName){
+                    foreach (string UUID in UUIDs)
+                    {
+                        TextContentManager.Update(source_tf, UUID, new[] { "FolderName", "ParentUUID", "ParentFolder" }, new[] { targetFolder, null, null }, User.Identity.Name);
+                    }
+                }
+                else
+                {
+                    throw new Exception("Target folder is not of the same content type".Localize());
+                }
+
+                resultData.ReloadPage = true;
+            });
+            return Json(data);
+        }
         #endregion
 
         #region Copy

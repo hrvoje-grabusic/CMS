@@ -94,6 +94,15 @@ namespace Kooboo.CMS.Form.Html
     <table>
        @RenderHeader(folder,schema)
        <tbody>
+        @if(folder.Parent != null && ((TextFolder)folder.Parent).AsActual().SchemaName.EqualsOrNullEmpty(folder.SchemaName,StringComparison.OrdinalIgnoreCase)){{
+            <tr class=""foldertr"" data-folder=""@folder.Parent.FullName"">
+                <td></td>
+                <td>
+                    <a class=""f-icon folder"" href=""@this.Url.Action(""Index"", ViewContext.RequestContext.AllRouteValues().Merge(""FolderName"", (object)(folder.Parent.FullName)).Merge(""FullName"", (object)(folder.Parent.FullName)))"">..</a>
+                </td>
+                <td colspan=""100""></td>
+            </tr>
+        }}
         @if (childFolders.Length == 0 && ViewBag.PagedList.TotalItemCount == 0)
         {{
             <tr class=""empty"">
@@ -105,7 +114,7 @@ namespace Kooboo.CMS.Form.Html
         else{{
             foreach (dynamic item in childFolders)
                 {{
-                    <tr class=""foldertr @((item.Hidden == true)? ""hidden-folder"":"""")"">
+                    <tr class=""foldertr @((item.Hidden == true)? ""hidden-folder"":"""")"" data-folder=""@item.FullName"">
                         <td class=""checkbox mutiple undraggable"">
                             @if (ViewBag.FolderPermission)
                             {{
@@ -171,11 +180,11 @@ namespace Kooboo.CMS.Form.Html
             var hasworkflowItem = workflowItem != null;
             var availableEdit = hasworkflowItem || (!hasworkflowItem && allowedEdit);
     <tr id=""@item.UUID"" data-parent-chain='' class= ""doctr  @((item.IsLocalized != null && item.IsLocalized == false) ? ""unlocalized"" : ""localized"") @((item.Published == null || item.Published == false) ? ""unpublished"" : ""published"") @(hasworkflowItem ? ""hasWorkflowItem"" : """")"" >
-        <td class=""checkbox mutiple @(ViewBag.Draggable? ""draggable"":"""")"">
+        <td class=""checkbox mutiple draggable"">
             <div>
-            @if(ViewBag.Draggable){{
+            
             @Html.IconImage(""drag"")
-            }}
+            
             @if (availableEdit)
             {{
                 <input type=""checkbox"" name=""select"" class=""select doc"" value=""@item.UUID"" data-id-property=""UUID"" data-sequence=""@item.Sequence""/>
