@@ -225,6 +225,10 @@ namespace Kooboo.CMS.Sites.Controllers
             {
                 throw new ArgumentNullException(url);
             }
+            if (!ImageTools.IsImageExtension(Path.GetExtension(url)))
+            {
+                throw new HttpException(403, "");
+            }
             url = HttpUtility.UrlDecode(url);
             var index = url.IndexOf("?");
             if (index != -1)
@@ -305,6 +309,14 @@ namespace Kooboo.CMS.Sites.Controllers
         /// </summary>
         public virtual ActionResult SmartSize(string url, int width, int height, string vAlign = "center", string hAlign = "center", long quality = 95l, string key="")
         {
+            if (string.IsNullOrEmpty(url))
+            {
+                throw new ArgumentNullException(url);
+            }
+            if (!ImageTools.IsImageExtension(Path.GetExtension(url)))
+            {
+                throw new HttpException(403, "");
+            }
             string imageFullPath;
 			if (Regex.IsMatch(url, @"^https?"))
 			{
@@ -374,6 +386,15 @@ namespace Kooboo.CMS.Sites.Controllers
 		/// </summary>
 		public ActionResult CropAndResize(string url, int x, int y, int width, int height, int destWidth=0, int destHeight=0)
 		{
+            if (string.IsNullOrEmpty(url))
+            {
+                throw new ArgumentNullException(url);
+            }
+            if (!ImageTools.IsImageExtension(Path.GetExtension(url)))
+            {
+                throw new HttpException(403, "");
+            }
+
 			var imageFullPath = Server.MapPath(HttpUtility.UrlDecode(url));
 
 			var cachingPath = GetCachingFilePathCropAndResize(imageFullPath, x, y, width, height, destWidth, destHeight);
