@@ -566,6 +566,50 @@ namespace Kooboo.CMS.Content.Services
             Update(textFolder, uuid, new[] { fieldName }, new[] { value }, userName, enableVersion);
         }
 
+        /// <summary>
+        /// Move textcontent to another folder and move all the referenced files
+        /// </summary>
+        public virtual void MoveToFolder(TextFolder source_tf, TextFolder target_tf, TextContent content, string parentUUID = null, string userName = "", bool enableVersion = true)
+        {
+            if (content != null)
+            {
+                content.FolderName = target_tf.FullName;
+                content.ParentUUID = parentUUID;
+                content = Providers.DefaultProviderFactory.GetProvider<ITextContentFileProvider>().MoveFiles(content);
+                
+                // version and lastmodified
+                content.___EnableVersion___ = enableVersion;
+                content.UtcLastModificationDate = DateTime.UtcNow;
+
+                // user
+                if (!string.IsNullOrEmpty(userName))
+                {
+                    content.UserId = userName;
+                }
+
+                // update database
+                EventBus.Content.ContentEvent.Fire(ContentAction.PreUpdate, content);
+                TextContentProvider.Update(content, content);
+                EventBus.Content.ContentEvent.Fire(ContentAction.Update, content);
+            }
+        }
+
+        /// <summary>
+        /// Move multiple textcontent to another folder and move all their referenced files
+        /// </summary>
+        public virtual void MoveToFolderBatch(TextFolder source_tf, TextFolder target_tf, string[] UUIDs, string userName = "", bool enableVersion = true)
+        {
+            foreach (string UUID in UUIDs)
+            {
+                TextContent content = source_tf.CreateQuery().WhereEquals("UUID", UUID).FirstOrDefault();
+
+                // remove parentUUID if the parent is not going to be moved in the same batch
+                string parentUUID = content.ParentUUID !=null && UUIDs.Contains(content.ParentUUID) ? content.ParentUUID : null ;
+
+                MoveToFolder(source_tf, target_tf, content, parentUUID, userName, enableVersion);
+            }
+        }
+
         public virtual TextContent Copy(Schema schema, string uuid)
         {
             var repository = schema.Repository;
@@ -628,5 +672,6 @@ namespace Kooboo.CMS.Content.Services
             this.Update(textFolder, contentUUID, "Published", false, userName);
         }
         #endregion
+
     }
 }

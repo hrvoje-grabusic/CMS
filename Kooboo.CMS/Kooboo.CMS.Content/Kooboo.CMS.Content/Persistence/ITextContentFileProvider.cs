@@ -18,5 +18,6 @@ namespace Kooboo.CMS.Content.Persistence
     {
         string Save(TextContent content, ContentFile file);
         void DeleteFiles(TextContent content);
+        TextContent MoveFiles(TextContent content);
     }
 }

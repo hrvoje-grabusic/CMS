@@ -1047,11 +1047,9 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
                 var source_tf = new TextFolder(Repository.Current, folderName).AsActual();
                 var target_tf = new TextFolder(Repository.Current, targetFolder).AsActual();
 
-                if(source_tf.SchemaName==target_tf.SchemaName){
-                    foreach (string UUID in UUIDs)
-                    {
-                        TextContentManager.Update(source_tf, UUID, new[] { "FolderName", "ParentUUID", "ParentFolder" }, new[] { targetFolder, null, null }, User.Identity.Name);
-                    }
+                if(source_tf.SchemaName==target_tf.SchemaName)
+                {
+                    TextContentManager.MoveToFolderBatch(source_tf, target_tf, UUIDs, User.Identity.Name);
                 }
                 else
                 {

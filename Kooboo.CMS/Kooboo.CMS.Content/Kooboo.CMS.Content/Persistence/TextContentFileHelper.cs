@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Kooboo.Drawing;
 using System.IO;
+
 namespace Kooboo.CMS.Content.Persistence.Default
 {
     public static class TextContentFileHelper
@@ -59,7 +60,7 @@ namespace Kooboo.CMS.Content.Persistence.Default
                     {
                         if (file.Stream.Length > 0 && !string.IsNullOrEmpty(file.FileName))
                         {
-                            var fileVirtualPath = textContentFileProvider.Save(content, file);//hrcvoje remove Url.ResolveUrl()
+                            var fileVirtualPath = textContentFileProvider.Save(content, file);//hrvoje remove Url.ResolveUrl()
                             var value = content[file.Name] == null ? "" : content[file.Name].ToString();
                             if (fileFields.ContainsKey(file.Name))
                             {
@@ -90,6 +91,11 @@ namespace Kooboo.CMS.Content.Persistence.Default
         public static void DeleteFiles(this TextContent content)
         {
             Providers.DefaultProviderFactory.GetProvider<ITextContentFileProvider>().DeleteFiles(content);
+        }
+
+        public static void MoveFiles(this TextContent content)
+        {
+            Providers.DefaultProviderFactory.GetProvider<ITextContentFileProvider>().MoveFiles(content);
         }
     }
 }
