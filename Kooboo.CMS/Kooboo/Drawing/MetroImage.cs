@@ -167,13 +167,13 @@ namespace Kooboo.Drawing
             float nPercentH = 0;
 
             // max size
-            if (Width > 1024)
+            if (Width > 3000)
             {
-                Width = 1024;
+                Width = 3000;
             }
-            if (Height > 1024)
+            if (Height > 3000)
             {
-                Height = 1024;
+                Height = 3000;
             }
 
             nPercentW = ((float)Width / (float)sourceWidth);
