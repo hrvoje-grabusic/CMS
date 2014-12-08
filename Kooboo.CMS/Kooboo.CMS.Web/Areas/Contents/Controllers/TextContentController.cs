@@ -387,7 +387,7 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
         [Kooboo.CMS.Web.Authorizations.Authorization(AreaName = "Contents", Group = "", Name = "Content", Order = 1)]
         [HttpGet]
         public ActionResult PositionCrop(string folderName, string uuid, 
-            string ImageField = "Image", string CropInfoField="CropInfo", String poisitionName="default")
+            string ImageField = "Image", string CropInfoField="CropInfo", String positionName="default")
         {
 
             TextFolder tf = new TextFolder(Repository, folderName).AsActual();
@@ -400,7 +400,7 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
 
             if (!String.IsNullOrEmpty(crop_json)) {
                 CropInfo ci = Newtonsoft.Json.JsonConvert.DeserializeObject<CropInfo>(crop_json.ToString());
-                cb = (CropBox)ci[CropInfoField] ?? new CropBox();
+                cb = ci.GetPosition(positionName);
             }
 
             ViewData["SourceUrl"] = ImageUrl;
@@ -413,14 +413,34 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
                 Height = cb.height
             };
 
-            return View();
+            return View(cb);
         }
 
         [Kooboo.CMS.Web.Authorizations.Authorization(AreaName = "Contents", Group = "", Name = "Content", Order = 1)]
         [HttpPost]
-        public virtual ActionResult PositionCropUpdate(string UUID, string siteName, string FolderName, string repository, 
-            string ImageField = "Image", string CropInfoField = "CropInfo", String poisitionName = "default")
+        public virtual ActionResult PositionCrop(string folderName, string uuid, FormCollection form,string CropInfoField = "CropInfo", String positionName = "default")
         {
+            TextFolder tf = new TextFolder(Repository, folderName).AsActual();
+            TextContent tc = tf.CreateQuery().WhereEquals("UUID", uuid).FirstOrDefault();
+
+            string crop_json = (string)tc[CropInfoField];
+
+            // crop info
+            CropInfo ci = new CropInfo();
+
+            if (!String.IsNullOrEmpty(crop_json))
+            {
+                ci = Newtonsoft.Json.JsonConvert.DeserializeObject<CropInfo>(crop_json.ToString());
+            }
+
+            // bind new crop dimensions
+            CropBox cb = ci.GetPosition(positionName);
+            cb.BindValues(form);
+
+            // update crop info field
+            tc[CropInfoField] = Newtonsoft.Json.JsonConvert.SerializeObject(ci);
+            ServiceFactory.TextContentManager.Update(Repository, tf, tc.UUID, tc.ToNameValueCollection(), User.Identity.Name);
+
             var data = new JsonResultData();
             return View();
         }
