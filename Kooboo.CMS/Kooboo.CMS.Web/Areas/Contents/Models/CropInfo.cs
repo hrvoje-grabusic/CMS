@@ -21,6 +21,12 @@ namespace Kooboo.CMS.Web.Areas.Contents.Models
                 return cb;
             }
         }
+
+
+        public static CropInfo FromString(string json)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<CropInfo>(json);
+        }
     }
     public class CropBox
     {
