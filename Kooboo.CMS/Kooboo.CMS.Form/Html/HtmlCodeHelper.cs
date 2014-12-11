@@ -107,7 +107,7 @@ namespace Kooboo.CMS.Form.Html
             try
             {
 
-                if (extension == ".gif" || extension == ".jpg" || extension == ".png" || extension == ".bmp" || extension == ".ico")
+                if (extension == ".gif" || extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".bmp" || extension == ".ico")
                 {
                     return new HtmlString(string.Format("<img src='{0}' height='60'/>", url));
                 }
