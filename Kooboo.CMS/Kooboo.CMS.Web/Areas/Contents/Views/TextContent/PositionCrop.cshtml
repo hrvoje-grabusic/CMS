@@ -10,6 +10,9 @@
     }
     var cropParam = ViewData["CropParam"];
     var cropJSON = Kooboo.Web.Script.Serialization.JsonHelper.ToJSON(cropParam);
+
+    int MinWidth = (int)ViewData["MinWidth"];
+    int MinHeight = (int)ViewData["MinHeight"];
 }
 <div class="common-form image-editor">
     <h4>Crop image for position: @Request["positionName"]</h4>
@@ -72,6 +75,7 @@
         var imgContainerHeight = 600;
         var sourceWidth, sourceHeight;
         var cropParam = $top.data('crop-param') || {};
+
         function setJscrop(option) {
             $cropImage.Jcrop(option, function () {
                 jcropAPI = this;
@@ -150,9 +154,19 @@
                     var cropSetting = {};
                     cropSetting['onChange'] = cropChange;
                     cropSetting['onSelect'] = cropChange;
+
+                    // min width and height
+                    @if(MinWidth>0){
+                        <text>
+                        cropSetting.minSize = [@MinWidth, @MinHeight];
+                        cropSetting.aspectRatio = @((decimal)MinWidth / (decimal)MinHeight);
+                        </text>
+                    }
+
+
                     if (cropSetting.minSize
-                && cropSetting.minSize[0]
-                && cropSetting.minSize[1]) {
+                    && cropSetting.minSize[0]
+                    && cropSetting.minSize[1]) {
                         cropSetting.minSize[0] = cropSetting.minSize[0] * percent;
                         cropSetting.minSize[1] = cropSetting.minSize[1] * percent;
                     }
@@ -160,75 +174,79 @@
 
                     $cropImage.Jcrop(cropSetting, function () { jcropAPI = this; });
 
-                    setJcropRatio();
-                    /*var select = getSelect(percent, croperWidth, croperHeight);
-                    if (select) {
-                        jcropAPI.setSelect([0, 0, $cropImage.width(), $cropImage.height()]);
-                    }*/
-                    //jcropAPI.release()
+                /*var select = getSelect(percent, croperWidth, croperHeight);
+                if (select) {
+                    jcropAPI.setSelect([0, 0, $cropImage.width(), $cropImage.height()]);
+                }*/
+                //jcropAPI.release()
 
-                    // set current zone
-                    jcropAPI.setSelect([@Model.x * percent, @Model.y * percent,
-                        @Model.x * percent+ @Model.width * percent,
-                        @Model.y * percent + @Model.height * percent ]);
-
-                }, 200);
-            });
-        };
-
-        var $file = $('#file')
-        $file.change(function () {
-            $(this).parents('form').ajaxSubmit({
-                success: function (response, statusText, xhr, $form) {
-                    window.loading.show();
-                    var responseData = response;
-                    if (typeof (response) == 'string') {
-                        try {
-                            responseData = $.parseJSON(response);
-                        } catch (e) {
-                            responseData = $.parseJSON($(response).text());
-                        }
-
+                // set current zone
+                @if(Model!=null){
+                        <text>
+                jcropAPI.setSelect([@Model.x * percent, @Model.y * percent,
+                    @Model.x * percent+ @Model.width * percent,
+                    @Model.y * percent + @Model.height * percent ]);
+                </text>
                     }
 
-                    loadImage(responseData.Model.PreviewUrl, responseData.Model.ImageUrl);
+                
+            }, 200);
+        });
+    };
+
+    var $file = $('#file')
+    $file.change(function () {
+        $(this).parents('form').ajaxSubmit({
+            success: function (response, statusText, xhr, $form) {
+                window.loading.show();
+                var responseData = response;
+                if (typeof (response) == 'string') {
+                    try {
+                        responseData = $.parseJSON(response);
+                    } catch (e) {
+                        responseData = $.parseJSON($(response).text());
+                    }
+
                 }
-            });
-        });
 
-        var getSelect = function (percent, width, height) {
-            if (cropParam.X) {
-                return [cropParam.X * percent,
-                    cropParam.Y * percent,
-                    cropParam.X * percent + cropParam.Width * percent,
-                    cropParam.Y * percent + cropParam.Height * percent];
+                loadImage(responseData.Model.PreviewUrl, responseData.Model.ImageUrl);
             }
-            else {
-                return [width * 0.25, height * 0.25, width * 0.75, height * 0.75];
-            }
-        };
-        var defaultImageUrl = '@Html.Raw(sourceUrl)';
-        if (defaultImageUrl) {
-            loadImage('@Html.Raw(previewUrl)', '@Html.Raw(sourceUrl)');
+        });
+    });
+
+    var getSelect = function (percent, width, height) {
+        if (cropParam.X) {
+            return [cropParam.X * percent,
+                cropParam.Y * percent,
+                cropParam.X * percent + cropParam.Width * percent,
+                cropParam.Y * percent + cropParam.Height * percent];
         }
+        else {
+            return [width * 0.25, height * 0.25, width * 0.75, height * 0.75];
+        }
+    };
+    var defaultImageUrl = '@Html.Raw(sourceUrl)';
+    if (defaultImageUrl) {
+        loadImage('@Html.Raw(previewUrl)', '@Html.Raw(sourceUrl)');
+    }
 
-        $('#save').click(function () {
-            var onCropped = $top.data('onCropped');
+    $('#save').click(function () {
+        var onCropped = $top.data('onCropped');
 
-            var action = $('#crop-form').attr('action');
-            var values = cropParam//$('#crop-form').serialize();
+        var action = $('#crop-form').attr('action');
+        var values = cropParam//$('#crop-form').serialize();
 
-            $.post(action, values, function (data) {
-                //alert(data)
-                $.popContext.getCurrent().close();
-            });
-        });
-        //if ($top.data('crop-param')) {
-        //    uploadSuccess($top.data('crop-param'));
-        //}
-
-        $('.cancel').click(function () {
+        $.post(action, values, function (data) {
+            //alert(data)
             $.popContext.getCurrent().close();
         });
+    });
+    //if ($top.data('crop-param')) {
+    //    uploadSuccess($top.data('crop-param'));
+    //}
+
+    $('.cancel').click(function () {
+        $.popContext.getCurrent().close();
+    });
     });
 </script>

@@ -386,7 +386,7 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
 
         [Kooboo.CMS.Web.Authorizations.Authorization(AreaName = "Contents", Group = "", Name = "Content", Order = 1)]
         [HttpGet]
-        public ActionResult PositionCrop(string folderName, string uuid, 
+        public ActionResult PositionCrop(string folderName, string uuid, int minwidth, int minheight,
             string ImageField = "Image", string CropInfoField="CropInfo", String positionName="default")
         {
 
@@ -413,12 +413,15 @@ namespace Kooboo.CMS.Web.Areas.Contents.Controllers
                 Height = cb.height
             };
 
+            ViewData["minwidth"] = minwidth;
+            ViewData["minheight"] = minheight;
+
             return View(cb);
         }
 
         [Kooboo.CMS.Web.Authorizations.Authorization(AreaName = "Contents", Group = "", Name = "Content", Order = 1)]
         [HttpPost]
-        public virtual ActionResult PositionCrop(string folderName, string uuid, FormCollection form,string CropInfoField = "CropInfo", String positionName = "default")
+        public virtual ActionResult PositionCrop(string folderName, string uuid, FormCollection form, string CropInfoField = "CropInfo", String positionName = "default")
         {
             TextFolder tf = new TextFolder(Repository, folderName).AsActual();
             TextContent tc = tf.CreateQuery().WhereEquals("UUID", uuid).FirstOrDefault();
