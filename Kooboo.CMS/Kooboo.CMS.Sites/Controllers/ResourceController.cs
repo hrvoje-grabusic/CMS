@@ -384,7 +384,7 @@ namespace Kooboo.CMS.Sites.Controllers
 		/// <summary>
 		/// Crop and resize
 		/// </summary>
-		public ActionResult CropAndResize(string url, int x, int y, int width, int height, int destWidth=0, int destHeight=0)
+		public ActionResult CropAndResize(string url, int x, int y, int width, int height, int destWidth=0, int destHeight=0, string key="")
 		{
             if (string.IsNullOrEmpty(url))
             {
@@ -406,6 +406,15 @@ namespace Kooboo.CMS.Sites.Controllers
 				{
 					if (!System.IO.File.Exists(cachingPath))
 					{
+                        // check param signiture
+                        string str_key = url + width.ToString() + height.ToString() + width + height + destWidth + destHeight;
+                        bool authorized = User.Identity.IsAuthenticated || SecurityHelper.Encrypt(str_key) == key;
+                        if (!authorized)
+                        {
+                            Response.Write("Parameter signiture does not match parameter values, access denied.");
+                            return new EmptyResult();
+                        }
+
 						var dir = Path.GetDirectoryName(cachingPath);
 						IOUtility.EnsureDirectoryExists(dir);
 						var success = MetroImage.CropAndResize(imageFullPath, cachingPath, x, y, width, height, destWidth, destHeight);

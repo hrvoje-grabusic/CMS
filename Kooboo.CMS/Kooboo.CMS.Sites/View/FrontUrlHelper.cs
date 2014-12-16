@@ -317,8 +317,10 @@ namespace Kooboo.CMS.Sites.View
             string str_key = imagePath + x.ToString() + y.ToString() + width.ToString() + height.ToString() + destWidth.ToString() + destHeight.ToString() + quality.ToString();
             string key = SecurityHelper.Encrypt(str_key);
 
-            string img = this.WrapperUrl(this.Url.Action("CropAndResize", "Resource", new { url = Url.Encode(imagePath), area = "", x = x, y = y, width = width, height = height, destWidth = destWidth, destHeight = destHeight , key=key})).ToString();
-            return new HtmlString(HttpContext.Current.Server.HtmlEncode(img));//
+            return ResourceCDNUrl(this.WrapperUrl(
+                this.Url.Action("CropAndResize", "Resource", new { url = imagePath, siteName = Site.FullName, area = "", x = x, y = y, width = width, height = height, destWidth = destWidth, destHeight = destHeight, key = key }
+                )).ToString());
+            //return new HtmlString(HttpContext.Current.Server.HtmlEncode(img)));//
         }
 
         /// <summary>
