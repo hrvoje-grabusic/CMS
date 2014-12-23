@@ -184,9 +184,16 @@ body {
 /* Logo
 ----------------------------------------------------------*/
 .logo {
+	  /*
 	float: left;
 	padding: 8px 45px 8px 10px;
 	position: relative;
+    metro    */
+     float: left;
+    padding: 5px 10px;
+    font-size: 18px;
+    color:white;
+    font-family:'Segoe UI';
 
 	img {
 		display: block;
@@ -295,10 +302,10 @@ body {
 	position: fixed;
 	right: 0;
 	top: 40px;
-
+    /* remove fixed
 	.in-dialog & {
 		top: 51px;
-	}
+	}*/
 }
 
 /* Topbar
@@ -358,11 +365,11 @@ body {
 	top: 40px;
 	z-index: 999;
 }
-
+/* hrvoje remove fixed 
 .in-dialog #main-container > .wrap .topbar {
 	top: 0;
 }
-
+    */
 /* Common-form
 ----------------------------------------------------------*/
 #main-container > .wrap .common-form.fixed {
@@ -432,13 +439,14 @@ body {
 	margin: 51px -20px 0;
 }
 
+/* hrvoje remove fixed
 .blank.in-dialog .common-table.fixed .thead {
 	top: 71px;
 }
 
 .blank.in-dialog .common-table.fixed .tbody {
 	margin-top: 0;
-}
+} */
 
 /* =3 Main
 ---------------------------------------------------------------------------------------------------------------------*/
@@ -622,6 +630,9 @@ body {
 	input {
 		width: 126px;
 	}
+}
+.category-folder {
+    padding:5px !important;
 }
 
 /* Menu

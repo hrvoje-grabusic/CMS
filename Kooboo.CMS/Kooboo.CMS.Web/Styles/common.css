@@ -1004,6 +1004,7 @@ input, button, select, textarea {
 .common-form .buttons {
 	margin-top: 30px;
 	text-align: right;
+    height:60px !important; /*hrvoje */
 }
 
 .common-form .buttons .button,
@@ -2135,7 +2136,29 @@ body .select2-results .select2-result-label {
 	padding: 20px;
 	width: 840px !important;
 }
-
+/* max*/
+.ui-dialog.max {
+    position:fixed;
+	background: #ddd;
+    top: 0 !important;
+	left: 0 !important;
+	padding:0 !important;
+	width: 100% !important;
+    height: 100% !important;
+    max-height:  100% !important;
+}
+.ui-dialog.max .ui-dialog-content {
+	background: #FFF !important;
+	margin: 0 auto;
+	/*max-height: 95% !important;*/
+	overflow-y: hidden !important;
+	/*padding: 20px 20px 0 20px;*/
+    padding:0 !important;
+    height: 100% !important;
+    width: 100% !important;
+    max-height:  100% !important;
+}
+/*end max*/
 .iframe-dialog .ui-dialog-content {
 	overflow: hidden;
 	padding: 0;
@@ -2535,9 +2558,16 @@ body #diffBox .diffTable td.lineNumber {
 /* Logo
 ----------------------------------------------------------*/
 .logo {
+    /*
 	float: left;
 	padding: 8px 45px 8px 10px;
 	position: relative;
+    metro    */
+     float: left;
+    padding: 5px 10px;
+    font-size: 18px;
+    color:white;
+    font-family:'Segoe UI';
 }
 
 .logo img {
@@ -2761,6 +2791,12 @@ body #diffBox .diffTable td.lineNumber {
 	padding: 7px;
 	width: 28px;
 }
+
+.category-folder {
+    padding:5px !important;
+}
+
+
 /* Search panel */
 .search-panel {
 	position: relative;
